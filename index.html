@@ -57,9 +57,10 @@ position: sticky; top: 0; z-index: 50;
 height: var(–nav-h);
 display: flex; align-items: center; justify-content: space-between;
 padding: 0 16px;
-background: rgba(245,242,236,0.92);
-backdrop-filter: blur(16px);
-border-bottom: 1px solid var(–border);
+background: rgba(245,242,236,0.45);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border-bottom: 1px solid rgba(61,59,55,0.07);
 gap: 10px;
 flex-shrink: 0;
 }
@@ -139,9 +140,11 @@ vertical-align: middle; border-radius: 50%;
 
 /* timetable */
 .tt-card {
-background: rgba(255,255,255,0.55);
+background: rgba(255,255,255,0.42);
+backdrop-filter: blur(14px);
+-webkit-backdrop-filter: blur(14px);
 border-radius: var(–r2);
-border: 1px solid var(–border);
+border: 1px solid rgba(255,255,255,0.5);
 overflow: hidden;
 box-shadow: var(–shadow);
 }
@@ -243,9 +246,11 @@ cursor: pointer; z-index: 2;
 UNSCHEDULED POOL (main page)
 ═══════════════════════════════════ */
 .unscheduled-section {
-background: rgba(255,255,255,0.5);
+background: rgba(255,255,255,0.42);
+backdrop-filter: blur(14px);
+-webkit-backdrop-filter: blur(14px);
 border-radius: var(–r2);
-border: 1px solid var(–border);
+border: 1px solid rgba(255,255,255,0.5);
 padding: 14px 16px;
 box-shadow: var(–shadow);
 }
@@ -334,7 +339,7 @@ to { transform: none; opacity: 1; }
 SETTINGS PAGE
 ═══════════════════════════════════ */
 #page-settings { background: var(–gofun); }
-#page-settings .nav { background: rgba(237,232,223,0.92); }
+#page-settings .nav { background: rgba(237,232,223,0.45); }
 
 .settings-body {
 flex: 1; padding: 16px;
@@ -353,7 +358,9 @@ gap: 14px;
 }
 
 .card {
-background: var(–shiro);
+background: rgba(245,242,236,0.82);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
 border-radius: var(–r2);
 border: 1px solid var(–border);
 padding: 16px; box-shadow: var(–shadow);
@@ -485,12 +492,29 @@ transition: all 0.15s;
 .toggle-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .toggle-chip {
 padding: 6px 13px; border-radius: 20px;
-border: 1px solid var(–border); background: transparent;
+border: 1.5px solid var(–border); background: var(–gofun);
 font-size: 0.72rem; cursor: pointer; color: var(–sumi2);
-font-family: ‘Noto Sans TC’, sans-serif; transition: all 0.15s;
+font-family: ‘Noto Sans TC’, sans-serif; transition: all 0.18s;
+font-weight: 400;
 }
-.toggle-chip:hover { background: var(–washi); }
-.toggle-chip.on { background: var(–sumi); color: var(–shiro); border-color: var(–sumi); }
+.toggle-chip:hover { background: var(–washi); border-color: var(–nezumi); }
+.toggle-chip.on {
+background: var(–sumi); color: var(–shiro);
+border-color: var(–sumi); font-weight: 500;
+box-shadow: 0 2px 8px rgba(61,59,55,0.25);
+}
+
+/* today column */
+.th-today { position: relative; }
+.today-pill {
+display: inline-flex; align-items: center;
+background: var(–kohaku); color: #fff;
+border-radius: 20px; padding: 3px 10px;
+font-size: 0.68rem; font-weight: 600;
+letter-spacing: 0.06em;
+font-family: ‘Noto Serif TC’, serif;
+box-shadow: 0 2px 8px rgba(201,149,108,0.4);
+}
 
 /* bg grid */
 .bg-grid {
@@ -610,14 +634,16 @@ overflow: hidden; text-overflow: ellipsis;
 
 /* bg layers */
 #bg-layer {
-position: fixed; inset: 0; z-index: -1;
+position: fixed; inset: 0; z-index: -2;
 background-size: cover; background-position: center;
-transition: all 0.6s ease;
+background-attachment: fixed;
+transition: all 0.7s ease;
 }
 #bg-overlay {
-position: fixed; inset: 0; z-index: 0;
+position: fixed; inset: 0; z-index: -1;
 transition: background 0.5s; pointer-events: none;
 }
+body { background: transparent; }
 .page { position: relative; z-index: 1; }
 
 /* ═══════════════════════════════════
@@ -634,6 +660,25 @@ table.tt { min-width: 340px; }
 .main-body { padding: 20px 24px; }
 .settings-body { padding: 20px 24px; }
 }
+.divider-line { height:1px; background:var(–border); margin:14px 0; }
+.sync-dot {
+width:7px; height:7px; border-radius:50%;
+background:var(–nezumi); display:inline-block;
+margin-right:4px; transition:background 0.3s;
+}
+.sync-dot.ok  { background:#7a9e7e; }
+.sync-dot.err { background:var(–kurenai); }
+.sync-dot.busy{ background:var(–kohaku); animation:blink 0.8s infinite; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.view-only-bar {
+position:sticky; top:var(–nav-h); z-index:45;
+background:rgba(181,112,106,0.85); backdrop-filter:blur(10px);
+color:#fff; text-align:center; font-size:0.75rem;
+padding:7px 16px; letter-spacing:0.04em;
+font-family:‘Noto Serif TC’,serif;
+display:none;
+}
+.view-only-bar.show { display:block; }
 </style>
 
 </head>
@@ -653,11 +698,13 @@ table.tt { min-width: 340px; }
       <span class="nav-title-edit-btn" onclick="editTitle()" title="修改名稱">✎</span>
     </div>
     <div class="nav-actions">
+      <button class="btn" id="syncBtn" onclick="openShareModal()" title="分享課表">🔗</button>
       <button class="btn" onclick="exportPNG()">↓ 匯出</button>
       <button class="btn orange" onclick="goSettings()">⚙ 編輯</button>
     </div>
   </nav>
 
+  <div class="view-only-bar" id="viewOnlyBar">👁 瀏覽模式 — 這是別人的課表，你的變更不會被儲存</div>
   <div class="main-body">
     <div class="week-strip" id="weekStrip"></div>
 
@@ -803,8 +850,123 @@ table.tt { min-width: 340px; }
   </div>
 </div>
 
+<!-- MODAL: share / open timetable -->
+
+<div class="modal-mask" id="modalShare">
+  <div class="modal-box" style="max-width:360px">
+    <h3>🔗 分享 ／ 開啟課表</h3>
+
+```
+<div id="shareMySection">
+  <p style="font-size:0.75rem;color:var(--sumi2);margin-bottom:10px;line-height:1.6">
+    把這個連結傳給別人，對方打開後可以選擇「新建自己的課表」或「複製你的課表」當起點。
+  </p>
+  <div style="display:flex;gap:6px;align-items:center">
+    <input id="shareUrlInput" readonly style="flex:1;font-size:0.7rem;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--gofun);color:var(--sumi);outline:none;font-family:'DM Mono',monospace">
+    <button class="btn primary" onclick="copyShareUrl()" style="flex-shrink:0">複製</button>
+  </div>
+</div>
+
+<div class="divider-line"></div>
+
+<div id="openOtherSection">
+  <p style="font-size:0.75rem;color:var(--sumi2);margin-bottom:8px">貼上別人的課表連結：</p>
+  <div style="display:flex;gap:6px">
+    <input id="openUrlInput" placeholder="https://shimin-h.github.io/time/?t=xxxx" style="flex:1;font-size:0.7rem;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--gofun);color:var(--sumi);outline:none;font-family:'DM Mono',monospace">
+    <button class="btn orange" onclick="openOtherTT()" style="flex-shrink:0">開啟</button>
+  </div>
+</div>
+
+<div class="modal-btns" style="margin-top:14px">
+  <button class="m-cancel" onclick="closeShareModal()">關閉</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- visiting someone else's timetable: welcome banner -->
+
+<div class="modal-mask" id="modalWelcome">
+  <div class="modal-box" style="max-width:340px;text-align:center">
+    <div style="font-size:2rem;margin-bottom:8px">📅</div>
+    <h3 id="welcomeTitle" style="margin-bottom:8px">收到一份課表</h3>
+    <p style="font-size:0.78rem;color:var(--sumi2);line-height:1.7;margin-bottom:18px" id="welcomeDesc">
+      你打開了別人分享的課表。<br>要怎麼繼續？
+    </p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn primary" style="justify-content:center" onclick="welcomeNew()">✦ 新建我的空白課表</button>
+      <button class="btn orange" style="justify-content:center" onclick="welcomeCopy()">⊕ 複製這份課表來編輯</button>
+      <button class="btn" style="justify-content:center" onclick="welcomeView()">👁 只是瀏覽，不做變更</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <input type="file" id="bgUpload" accept="image/*" style="display:none" onchange="handleBgUpload(event)">
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+/* ── Firebase config ──────────────────────────────────
+   ⚠️  把下面換成你自己的 Firebase 專案設定
+   1. 去 https://console.firebase.google.com
+   2. 新增專案 → 新增 Web App → 複製 firebaseConfig
+   3. 把下面 FB_CONFIG 換掉
+   4. Firestore → 建立資料庫 → 規則設成:
+      allow read, write: if true;
+──────────────────────────────────────────────────── */
+const FB_CONFIG = {
+  apiKey: "AIzaSyBhjVt2giNtI0I0Xg7Op38m6aOxT7scQ_4",
+  authDomain: "timetable-f67f7.firebaseapp.com",
+  projectId: "timetable-f67f7",
+  storageBucket: "timetable-f67f7.firebasestorage.app",
+  messagingSenderId: "1002358831228",
+  appId: "1:1002358831228:web:c5ef0f1a7a2afef8d571f9",
+  measurementId: "G-9HZT4TC7XF"
+};
+
+let fbApp, db, currentDocId = null, unsub = null;
+
+async function fbInit() {
+  try {
+    fbApp = initializeApp(FB_CONFIG);
+    db    = getFirestore(fbApp);
+    console.log('[Firebase] ready');
+  } catch(e) { console.warn('[Firebase] init failed, offline mode'); }
+}
+
+window._fbSave = async function(data) {
+  if (!db || !currentDocId) return;
+  try {
+    await setDoc(doc(db,'timetables', currentDocId), { ...data, updatedAt: serverTimestamp() });
+  } catch(e) { console.warn('[Firebase] save failed', e); }
+};
+
+window._fbLoad = async function(id) {
+  if (!db) return null;
+  try {
+    const snap = await getDoc(doc(db,'timetables', id));
+    return snap.exists() ? snap.data() : null;
+  } catch(e) { return null; }
+};
+
+window._fbCreate = async function(data) {
+  if (!db) return null;
+  try {
+    const ref = await addDoc(collection(db,'timetables'), { ...data, createdAt: serverTimestamp() });
+    return ref.id;
+  } catch(e) { return null; }
+};
+
+await fbInit();
+
+// signal main script
+window._fbReady = true;
+document.dispatchEvent(new Event('fb-ready'));
+</script>
 
 <script>
 /* ════════════════════════════════
@@ -965,8 +1127,14 @@ function renderWeekStrip() {
 function renderTT() {
   const table = document.getElementById('ttTable');
   const inPick = pickModeCourse !== null;
+  const raw = new Date().getDay();
+  const todayIdx = raw === 0 ? 6 : raw - 1;
+
   let html = '<thead><tr><th class="th-time"></th>';
-  activeDays.forEach(di => { html += `<th>週${DAYS_ALL[di]}</th>`; });
+  activeDays.forEach(di => {
+    const isToday = di === todayIdx;
+    html += `<th class="${isToday ? 'th-today' : ''}">${isToday ? `<span class="today-pill">週${DAYS_ALL[di]}</span>` : `週${DAYS_ALL[di]}`}</th>`;
+  });
   html += '</tr></thead><tbody>';
   timeSlots.forEach((ts, si) => {
     html += '<tr>';
@@ -1320,14 +1488,15 @@ function applyBg() {
   const overlay = document.getElementById('bg-overlay');
   if (customBgUrl) {
     layer.style.backgroundImage = `url('${customBgUrl}')`;
-    overlay.style.background    = 'rgba(245,242,236,0.80)';
+    overlay.style.background    = 'rgba(245,242,236,0.55)';
   } else {
     const bg = BACKGROUNDS[bgActive];
     if (bg?.url) {
       layer.style.backgroundImage = `url('${bg.url}')`;
-      overlay.style.background    = 'rgba(245,242,236,0.82)';
+      overlay.style.background    = 'rgba(245,242,236,0.52)';
     } else {
       layer.style.backgroundImage = '';
+      layer.style.background      = 'var(--shiro)';
       overlay.style.background    = 'transparent';
     }
   }
@@ -1396,21 +1565,241 @@ document.addEventListener('keydown', e => {
 document.getElementById('inName').addEventListener('keydown', e => { if (e.key === 'Enter') addCourse(); });
 
 /* ════════════════════════════════
-   BOOT — sample data
+   SYNC & SHARE
 ════════════════════════════════ */
-function boot() {
-  const demo = [
-    {name:'數學', room:'A101', hex:'#7394b0', sessions:4},
-    {name:'英文', room:'B203', hex:'#8faabf', sessions:3},
-    {name:'物理', room:'C105', hex:'#8eaa8c', sessions:2},
-    {name:'歷史', room:'D301', hex:'#c4ad6e', sessions:2},
-    {name:'體育', room:'操場', hex:'#b3c4b0', sessions:2},
-    {name:'音樂', room:'E102', hex:'#b5a8c8', sessions:1},
-  ];
-  demo.forEach(x => courses.push({id: Date.now()+Math.random(), name:x.name, room:x.room, colorHex:x.hex, sessions:x.sessions}));
+const SAVE_KEY   = 'jikanwari_v1';
+const MY_ID_KEY  = 'jikanwari_myId';
+let   viewOnlyMode = false;
+let   guestSourceId = null; // the id we opened from URL
 
-  const ids = courses.reduce((acc,c) => { acc[c.name]=c.id; return acc; }, {});
-  schedule = {
+// ── localStorage helpers ──
+function saveLocal() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      courses, schedule, activeDays, timeSlots,
+      bgActive, appTitle,
+      customBgUrl: customBgUrl ? customBgUrl.slice(0,500000) : null,
+      myDocId: window._myDocId || null,
+    }));
+  } catch(e) {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify({courses,schedule,activeDays,timeSlots,bgActive,appTitle,customBgUrl:null,myDocId:window._myDocId||null})); }
+    catch(e2){}
+  }
+}
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const d = JSON.parse(raw);
+    if (d.courses)    courses    = d.courses;
+    if (d.schedule)   schedule   = d.schedule;
+    if (d.activeDays) activeDays = d.activeDays;
+    if (d.timeSlots)  timeSlots  = d.timeSlots;
+    if (d.bgActive!=null) bgActive = d.bgActive;
+    if (d.appTitle)   appTitle   = d.appTitle;
+    if (d.customBgUrl) customBgUrl = d.customBgUrl;
+    if (d.myDocId)    window._myDocId = d.myDocId;
+    return true;
+  } catch(e){ return false; }
+}
+
+// ── build payload ──
+function buildPayload() {
+  return { courses, schedule, activeDays, timeSlots, bgActive, appTitle };
+}
+function applyPayload(d) {
+  if (d.courses)    courses    = d.courses;
+  if (d.schedule)   schedule   = d.schedule;
+  if (d.activeDays) activeDays = d.activeDays;
+  if (d.timeSlots)  timeSlots  = d.timeSlots;
+  if (d.bgActive!=null) bgActive = d.bgActive;
+  if (d.appTitle)   appTitle   = d.appTitle;
+}
+
+// ── cloud save (debounced) ──
+let _saveTimer = null;
+function scheduleSave() {
+  if (viewOnlyMode) return;
+  saveLocal();
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(async () => {
+    if (!window._fbReady || !window._myDocId) return;
+    setSyncStatus('busy');
+    try {
+      await window._fbSave(buildPayload());
+      setSyncStatus('ok');
+    } catch(e){ setSyncStatus('err'); }
+  }, 1200);
+}
+function setSyncStatus(s) {
+  const btn = document.getElementById('syncBtn');
+  if (!btn) return;
+  btn.title = s==='ok'?'已同步':s==='busy'?'儲存中…':s==='err'?'同步失敗，僅本地儲存':'分享課表';
+}
+
+// ── Auto-save patches ──
+const _origRenderTT = renderTT;
+renderTT = function(){ _origRenderTT(); scheduleSave(); };
+const _origRenderPool = renderPool;
+renderPool = function(){ _origRenderPool(); scheduleSave(); };
+const _origRenderDayToggle = renderDayToggle;
+renderDayToggle = function(){ _origRenderDayToggle(); scheduleSave(); };
+const _origRenderTimeSlots = renderTimeSlots;
+renderTimeSlots = function(){ _origRenderTimeSlots(); scheduleSave(); };
+const _origApplyBg = applyBg;
+applyBg = function(){ _origApplyBg(); scheduleSave(); };
+const _origSyncTitle = syncTitle;
+syncTitle = function(v){ _origSyncTitle(v); scheduleSave(); };
+const _origConfirmTitle = confirmTitle;
+confirmTitle = function(){ _origConfirmTitle(); scheduleSave(); };
+
+// ── Share modal ──
+function openShareModal() {
+  const myId = window._myDocId || '（尚未同步）';
+  const url  = `${location.origin}${location.pathname}?t=${myId}`;
+  document.getElementById('shareUrlInput').value = url;
+  document.getElementById('openUrlInput').value  = '';
+  document.getElementById('modalShare').classList.add('open');
+}
+function closeShareModal() {
+  document.getElementById('modalShare').classList.remove('open');
+}
+function copyShareUrl() {
+  const inp = document.getElementById('shareUrlInput');
+  inp.select();
+  navigator.clipboard.writeText(inp.value).then(()=>toast('連結已複製！')).catch(()=>{
+    document.execCommand('copy'); toast('連結已複製！');
+  });
+}
+function openOtherTT() {
+  const raw = document.getElementById('openUrlInput').value.trim();
+  const m   = raw.match(/[?&]t=([a-zA-Z0-9_-]+)/);
+  if (!m) { toast('連結格式不對，找不到課表 ID'); return; }
+  closeShareModal();
+  location.href = `${location.origin}${location.pathname}?t=${m[1]}`;
+}
+
+// ── Welcome modal (when opening someone else's link) ──
+let _guestData = null;
+function showWelcome(data, sourceId) {
+  _guestData   = data;
+  guestSourceId = sourceId;
+  document.getElementById('welcomeTitle').textContent = `「${data.appTitle||'課表'}」`;
+  document.getElementById('welcomeDesc').innerHTML =
+    `有人分享了課表給你。<br>要怎麼繼續？`;
+  document.getElementById('modalWelcome').classList.add('open');
+}
+function welcomeNew() {
+  document.getElementById('modalWelcome').classList.remove('open');
+  // clear everything, push new doc
+  courses=[]; schedule={}; activeDays=[0,1,2,3,4];
+  timeSlots=[{start:'08:00',end:'08:50'},{start:'09:00',end:'09:50'},
+    {start:'10:00',end:'10:50'},{start:'11:00',end:'11:50'},
+    {start:'13:00',end:'13:50'},{start:'14:00',end:'14:50'},
+    {start:'15:00',end:'15:50'},{start:'16:00',end:'16:50'}];
+  bgActive=0; appTitle='時間割'; customBgUrl=null;
+  history.replaceState(null,'',location.pathname);
+  createMyDoc().then(()=>{ applyBg(); document.getElementById('navTitle').textContent=appTitle; renderMain(); toast('已建立你的新課表 ✓'); });
+}
+function welcomeCopy() {
+  document.getElementById('modalWelcome').classList.remove('open');
+  applyPayload(_guestData);
+  history.replaceState(null,'',location.pathname);
+  createMyDoc().then(()=>{ applyBg(); document.getElementById('navTitle').textContent=appTitle; renderMain(); toast('已複製課表，開始編輯 ✓'); });
+}
+function welcomeView() {
+  document.getElementById('modalWelcome').classList.remove('open');
+  viewOnlyMode = true;
+  document.getElementById('viewOnlyBar').classList.add('show');
+  document.getElementById('syncBtn').style.display='none';
+  applyBg(); document.getElementById('navTitle').textContent=appTitle;
+  renderMain();
+}
+
+// ── create a new Firestore doc for this user ──
+async function createMyDoc() {
+  if (!window._fbReady) return;
+  const id = await window._fbCreate(buildPayload());
+  if (id) { window._myDocId = id; saveLocal(); setSyncStatus('ok'); }
+}
+
+/* ════════════════════════════════
+   BOOT
+════════════════════════════════ */
+async function boot() {
+  // check URL for shared timetable id
+  const params = new URLSearchParams(location.search);
+  const sharedId = params.get('t');
+
+  if (sharedId) {
+    // someone opened a shared link
+    const waitForFb = () => new Promise(res => {
+      if (window._fbReady) return res();
+      document.addEventListener('fb-ready', res, {once:true});
+      setTimeout(res, 4000); // fallback
+    });
+    await waitForFb();
+    const data = await window._fbLoad(sharedId);
+    if (data) {
+      applyPayload(data);
+      // check if this is MY own doc
+      const myId = localStorage.getItem(MY_ID_KEY) || (()=>{const s=localStorage.getItem(SAVE_KEY);try{return JSON.parse(s)?.myDocId;}catch{return null;}})();
+      if (myId && myId === sharedId) {
+        // it's my own link, just load normally
+        window._myDocId = sharedId;
+        applyBg(); document.getElementById('navTitle').textContent=appTitle;
+        renderMain(); setSyncStatus('ok');
+      } else {
+        // someone else's
+        showWelcome(data, sharedId);
+      }
+    } else {
+      toast('找不到這份課表，已建立新課表');
+      history.replaceState(null,'',location.pathname);
+      bootFresh();
+    }
+    return;
+  }
+
+  // normal boot
+  const hasSaved = loadLocal();
+  if (hasSaved) {
+    // try to reconnect to existing cloud doc
+    if (window._myDocId && window._fbReady) {
+      setSyncStatus('ok');
+    } else if (window._myDocId) {
+      document.addEventListener('fb-ready', ()=>setSyncStatus('ok'), {once:true});
+    }
+  } else {
+    bootFresh();
+  }
+  applyBg();
+  document.getElementById('navTitle').textContent = appTitle;
+  renderMain();
+
+  // create cloud doc if none yet
+  if (!window._myDocId) {
+    const waitFb = () => new Promise(res=>{
+      if(window._fbReady) return res();
+      document.addEventListener('fb-ready',res,{once:true});
+      setTimeout(res,4000);
+    });
+    waitFb().then(()=>createMyDoc());
+  }
+}
+
+function bootFresh() {
+  const demo = [
+    {name:'數學',room:'A101',hex:'#7394b0',sessions:4},
+    {name:'英文',room:'B203',hex:'#8faabf',sessions:3},
+    {name:'物理',room:'C105',hex:'#8eaa8c',sessions:2},
+    {name:'歷史',room:'D301',hex:'#c4ad6e',sessions:2},
+    {name:'體育',room:'操場',hex:'#b3c4b0',sessions:2},
+    {name:'音樂',room:'E102',hex:'#b5a8c8',sessions:1},
+  ];
+  demo.forEach(x=>courses.push({id:Date.now()+Math.random(),name:x.name,room:x.room,colorHex:x.hex,sessions:x.sessions}));
+  const ids=courses.reduce((a,c)=>{a[c.name]=c.id;return a;},{});
+  schedule={
     '0-0':{name:'數學',room:'A101',colorHex:'#7394b0',courseId:ids['數學']},
     '1-0':{name:'英文',room:'B203',colorHex:'#8faabf',courseId:ids['英文']},
     '2-0':{name:'物理',room:'C105',colorHex:'#8eaa8c',courseId:ids['物理']},
@@ -1418,9 +1807,10 @@ function boot() {
     '3-1':{name:'體育',room:'操場',colorHex:'#b3c4b0',courseId:ids['體育']},
     '4-3':{name:'音樂',room:'E102',colorHex:'#b5a8c8',courseId:ids['音樂']},
   };
-  renderMain();
 }
+
 boot();
+
 </script>
 
 </body>

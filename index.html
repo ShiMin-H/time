@@ -483,16 +483,29 @@ background: var(–sumi); color: var(–shiro);
 border-color: var(–sumi); font-weight: 500;
 box-shadow: 0 2px 8px rgba(61,59,55,0.25);
 }
+:root {
+  /* A deep, traditional Japanese Matcha Green */
+  --matcha-deep: #4B5135; 
+}
+
 /* today column */
-.th-today { position: relative; }
+.th-today { 
+  position: relative; 
+}
 .today-pill {
-display: inline-flex; align-items: center;
-background: var(#50634D); color: #fff;
-border-radius: 20px; padding: 3px 10px;
-font-size: 0.68rem; font-weight: 600;
-letter-spacing: 0.06em;
-font-family: ‘Noto Serif TC’, serif;
-box-shadow: 0 2px 8px rgba(201,149,108,0.4);
+  display: inline-flex; 
+  align-items: center;
+  /* Corrected the variable syntax and color */
+  background: var(--matcha-deep); 
+  color: #fff;
+  border-radius: 20px; 
+  padding: 3px 10px;
+  font-size: 0.68rem; 
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-family: 'Noto Serif TC', serif;
+  /* Updated shadow to match the green tone */
+  box-shadow: 0 2px 8px rgba(75, 81, 53, 0.3);
 }
 /* bg grid */
 .bg-grid {

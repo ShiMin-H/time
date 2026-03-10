@@ -3,327 +3,466 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>時間割 · 課表</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Timetable</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-/* ── WABI-SABI JAPANESE PALETTE ── */
+/* ═══════════════════════════════════
+   JAPANESE WABI-SABI PALETTE
+═══════════════════════════════════ */
 :root {
-  --shiro:    #f5f2ec;   /* 白 warm white */
-  --gofun:    #ede8df;   /* 胡粉 off-white */
-  --washi:    #e8e2d6;   /* 和紙 */
-  --nezumi:   #9e9b95;   /* 鼠 warm grey */
-  --sumi:     #3d3b37;   /* 墨 ink */
-  --sumi2:    #6b6760;   /* lighter ink */
-  --kohaku:   #c9956c;   /* 琥珀 amber */
-  --moegi:    #7a9e7e;   /* 萌黄 muted green */
-  --hanada:   #7394b0;   /* 縹 muted blue */
-  --kurenai:  #b5706a;   /* 紅 muted red */
-  --fuji:     #9b8fb5;   /* 藤 wisteria */
-  --tsuchi:   #b3a48a;   /* 土 earth */
-  --usucha:   #a89a7c;   /* 薄茶 */
-  --karashi:  #c4ad6e;   /* 芥子 mustard */
-  --border:   rgba(61,59,55,0.10);
-  --border2:  rgba(61,59,55,0.06);
-  --shadow:   0 2px 20px rgba(61,59,55,0.08);
-  --shadow2:  0 8px 40px rgba(61,59,55,0.13);
-  --r:        10px;
-  --r2:       16px;
+  --shiro:   #f5f2ec;
+  --gofun:   #ede8df;
+  --washi:   #e8e2d6;
+  --nezumi:  #9e9b95;
+  --sumi:    #3d3b37;
+  --sumi2:   #6b6760;
+  --kohaku:  #c9956c;
+  --kurenai: #b5706a;
+  --tsuchi:  #b3a48a;
+  --border:  rgba(61,59,55,0.11);
+  --shadow:  0 2px 16px rgba(61,59,55,0.08);
+  --shadow2: 0 8px 40px rgba(61,59,55,0.14);
+  --r: 10px;
+  --r2: 16px;
+  --nav-h: 56px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body {
-height: 100%;
+html { font-size: 16px; }
+body {
 font-family: ‘Noto Sans TC’, sans-serif;
 background: var(–shiro);
 color: var(–sumi);
-overflow: hidden;
+min-height: 100dvh;
+overflow-x: hidden;
 }
 
-/* ── PAGE SYSTEM ── */
+/* ═══════════════════════════════════
+PAGE SYSTEM
+═══════════════════════════════════ */
 .page {
-position: fixed; inset: 0;
-opacity: 0; pointer-events: none;
-transition: opacity 0.35s ease, transform 0.35s ease;
-overflow-y: auto;
+display: none;
+min-height: 100dvh;
+flex-direction: column;
 }
-.page.active {
-opacity: 1; pointer-events: all;
-transform: none !important;
-}
-#page-main { transform: translateX(-20px); }
-#page-settings { transform: translateX(20px); background: var(–gofun); }
+.page.active { display: flex; }
 
-/* ── NAV BAR ── */
+/* ═══════════════════════════════════
+NAV
+═══════════════════════════════════ */
 .nav {
 position: sticky; top: 0; z-index: 50;
+height: var(–nav-h);
 display: flex; align-items: center; justify-content: space-between;
-padding: 14px 24px;
-background: rgba(245,242,236,0.88);
-backdrop-filter: blur(14px);
+padding: 0 16px;
+background: rgba(245,242,236,0.92);
+backdrop-filter: blur(16px);
 border-bottom: 1px solid var(–border);
+gap: 10px;
+flex-shrink: 0;
 }
-.nav-logo {
+
+/* editable title */
+.nav-title-wrap {
+display: flex; align-items: center; gap: 6px;
+flex: 1; min-width: 0;
+}
+.nav-title {
 font-family: ‘Noto Serif TC’, serif;
-font-size: 1.1rem; font-weight: 600;
-letter-spacing: 0.08em;
+font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+font-weight: 600; letter-spacing: 0.06em;
 color: var(–sumi);
-display: flex; align-items: center; gap: 8px;
+cursor: pointer; border-radius: 6px;
+padding: 3px 7px;
+transition: background 0.15s;
+white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+max-width: 180px;
 }
-.nav-logo .kanji {
-font-size: 0.7rem; color: var(–nezumi);
-font-family: ‘DM Mono’, monospace;
-letter-spacing: 0.15em; text-transform: uppercase;
+.nav-title:hover { background: var(–washi); }
+.nav-title-edit-btn {
+font-size: 0.65rem; color: var(–nezumi); cursor: pointer;
+padding: 3px; border-radius: 4px; flex-shrink: 0;
+transition: color 0.15s;
 }
-.nav-actions { display: flex; gap: 8px; align-items: center; }
-.nav-btn {
-padding: 7px 16px; border-radius: 30px;
+.nav-title-edit-btn:hover { color: var(–kohaku); }
+
+.nav-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+.btn {
+padding: 7px 14px; border-radius: 30px;
 border: 1px solid var(–border);
 background: transparent;
-font-size: 0.75rem; font-family: ‘Noto Sans TC’, sans-serif;
+font-size: clamp(0.68rem, 1.5vw, 0.76rem);
+font-family: ‘Noto Sans TC’, sans-serif;
 color: var(–sumi2); cursor: pointer;
-transition: all 0.2s; letter-spacing: 0.03em;
-font-weight: 400;
+transition: all 0.18s; white-space: nowrap;
+display: inline-flex; align-items: center; gap: 4px;
 }
-.nav-btn:hover { background: var(–washi); color: var(–sumi); border-color: var(–nezumi); }
-.nav-btn.accent {
-background: var(–sumi); color: var(–shiro);
-border-color: var(–sumi);
-}
-.nav-btn.accent:hover { background: var(–sumi2); }
-.nav-btn.settings-btn {
-display: flex; align-items: center; gap: 5px;
-background: var(–kohaku); color: #fff; border-color: var(–kohaku);
-font-size: 0.72rem;
-}
-.nav-btn.settings-btn:hover { background: #b5845a; }
+.btn:hover { background: var(–washi); color: var(–sumi); }
+.btn.primary { background: var(–sumi); color: var(–shiro); border-color: var(–sumi); }
+.btn.primary:hover { background: var(–sumi2); }
+.btn.orange { background: var(–kohaku); color: #fff; border-color: var(–kohaku); }
+.btn.orange:hover { background: #b5845a; }
 
-/* ── MAIN VIEW ── */
-.main-body { padding: 20px 24px 40px; }
+/* ═══════════════════════════════════
+MAIN PAGE BODY
+═══════════════════════════════════ */
+.main-body {
+flex: 1;
+padding: 16px;
+display: flex; flex-direction: column; gap: 16px;
+max-width: 1100px; width: 100%; margin: 0 auto;
+}
 
-/* week selector strip */
+/* week strip */
 .week-strip {
-display: flex; gap: 6px; margin-bottom: 20px;
-overflow-x: auto; padding-bottom: 4px;
+display: flex; gap: 6px; overflow-x: auto;
+padding-bottom: 2px; flex-shrink: 0;
 }
 .week-strip::-webkit-scrollbar { display: none; }
 .week-chip {
 flex-shrink: 0;
-padding: 6px 14px; border-radius: 20px;
-font-size: 0.73rem; cursor: pointer;
-border: 1px solid var(–border);
+padding: 5px 14px; border-radius: 20px;
+font-size: 0.73rem; border: 1px solid var(–border);
 background: transparent; color: var(–nezumi);
-transition: all 0.18s; font-family: ‘Noto Sans TC’, sans-serif;
+transition: all 0.15s; cursor: default;
+font-family: ‘Noto Sans TC’, sans-serif;
 }
-.week-chip:hover { background: var(–washi); color: var(–sumi); }
-.week-chip.active { background: var(–sumi); color: var(–shiro); border-color: var(–sumi); }
+.week-chip.today { background: var(–sumi); color: var(–shiro); border-color: var(–sumi); }
+.today-dot {
+display: inline-block; width: 5px; height: 5px;
+background: var(–kohaku); border-radius: 50; margin-left: 4px;
+vertical-align: middle; border-radius: 50%;
+}
 
 /* timetable */
-.tt-scroll { overflow-x: auto; }
+.tt-card {
+background: rgba(255,255,255,0.55);
+border-radius: var(–r2);
+border: 1px solid var(–border);
+overflow: hidden;
+box-shadow: var(–shadow);
+}
+.tt-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table.tt {
 width: 100%; border-collapse: separate; border-spacing: 3px;
-min-width: 500px;
+min-width: 420px; padding: 8px;
 }
 table.tt th {
-font-size: 0.68rem; font-weight: 500; text-align: center;
-padding: 8px 4px; color: var(–nezumi); letter-spacing: 0.08em;
+font-size: clamp(0.6rem, 1.5vw, 0.7rem);
+font-weight: 500; text-align: center;
+padding: 6px 2px; color: var(–nezumi);
+letter-spacing: 0.06em;
 font-family: ‘Noto Serif TC’, serif;
 }
-table.tt th.th-time { width: 56px; }
+table.tt th.th-time { width: 48px; }
 .time-cell {
-text-align: right; padding-right: 10px;
-vertical-align: top; padding-top: 10px;
+text-align: right; padding-right: 8px;
+vertical-align: top; padding-top: 8px;
+white-space: nowrap;
 }
-.time-cell .t-period {
+.t-period {
 font-family: ‘DM Mono’, monospace;
-font-size: 0.62rem; color: var(–nezumi);
-display: block; line-height: 1;
+font-size: clamp(0.55rem, 1.2vw, 0.62rem);
+color: var(–nezumi); display: block;
 }
-.time-cell .t-time {
+.t-time {
 font-family: ‘DM Mono’, monospace;
-font-size: 0.58rem; color: var(–tsuchi);
-display: block; margin-top: 2px;
+font-size: clamp(0.5rem, 1.1vw, 0.57rem);
+color: var(–tsuchi); display: block; margin-top: 1px;
 }
 table.tt td.slot {
-height: 62px; border-radius: var(–r);
+height: clamp(52px, 8vw, 66px);
+border-radius: var(–r);
 border: 1.5px dashed rgba(61,59,55,0.13);
-background: rgba(232,226,214,0.30);
+background: rgba(232,226,214,0.28);
 vertical-align: middle; text-align: center;
 cursor: pointer; transition: all 0.18s;
-position: relative; min-width: 78px;
+position: relative;
+min-width: clamp(60px, 12vw, 88px);
 }
-table.tt td.slot.empty:hover {
+table.tt td.slot.empty:hover,
+table.tt td.slot.empty.pick-mode {
 border-color: var(–kohaku);
-background: rgba(201,149,108,0.08);
+background: rgba(201,149,108,0.10);
 }
-table.tt td.slot.filled {
-border: none; cursor: default;
+table.tt td.slot.empty.pick-mode {
+animation: pulse 1.2s infinite;
 }
+@keyframes pulse {
+0%,100% { background: rgba(201,149,108,0.08); }
+50% { background: rgba(201,149,108,0.18); }
+}
+table.tt td.slot.filled { border: none; cursor: default; }
 table.tt td.slot.drag-over {
 border-color: var(–kohaku) !important;
-background: rgba(201,149,108,0.12) !important;
-transform: scale(0.96);
+background: rgba(201,149,108,0.15) !important;
+transform: scale(0.95);
 }
 .slot-inner {
-width: 100%; height: 100%; border-radius: calc(var(–r) - 1px);
-display: flex; flex-direction: column; align-items: center;
-justify-content: center; gap: 2px;
-padding: 6px 4px;
+width: 100%; height: 100%;
+border-radius: calc(var(–r) - 1px);
+display: flex; flex-direction: column;
+align-items: center; justify-content: center;
+gap: 1px; padding: 4px 3px;
 position: relative; overflow: hidden;
 }
 .slot-inner::after {
-content: ‘’;
-position: absolute; inset: 0;
-background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+content: ‘’; position: absolute; inset: 0;
+background: linear-gradient(135deg,rgba(255,255,255,0.2) 0%,transparent 55%);
 pointer-events: none;
 }
 .slot-name {
-font-size: 0.76rem; font-weight: 500;
-line-height: 1.2; text-align: center;
+font-size: clamp(0.65rem, 1.6vw, 0.78rem);
+font-weight: 600; line-height: 1.2; text-align: center;
 font-family: ‘Noto Serif TC’, serif;
 }
 .slot-room {
-font-size: 0.59rem; opacity: 0.7;
-font-family: ‘DM Mono’, monospace;
-letter-spacing: 0.05em;
+font-size: clamp(0.52rem, 1.1vw, 0.6rem);
+opacity: 0.72; font-family: ‘DM Mono’, monospace;
 }
 .slot-time-tag {
-font-size: 0.55rem; opacity: 0.6;
-font-family: ‘DM Mono’, monospace;
+font-size: clamp(0.48rem, 1vw, 0.55rem);
+opacity: 0.6; font-family: ‘DM Mono’, monospace;
 }
 .slot-del {
-position: absolute; top: 4px; right: 4px;
-width: 15px; height: 15px;
-background: rgba(0,0,0,0.18); border-radius: 50%;
+position: absolute; top: 3px; right: 3px;
+width: 14px; height: 14px; border-radius: 50%;
+background: rgba(0,0,0,0.2); border: none;
 display: flex; align-items: center; justify-content: center;
-font-size: 0.5rem; color: #fff;
+font-size: 0.48rem; color: #fff;
 opacity: 0; transition: opacity 0.15s;
-cursor: pointer; border: none;
-z-index: 2;
+cursor: pointer; z-index: 2;
 }
 .slot-inner:hover .slot-del { opacity: 1; }
-.slot-plus { font-size: 1rem; color: rgba(61,59,55,0.18); pointer-events: none; }
+.slot-plus { font-size: 0.9rem; color: rgba(61,59,55,0.16); pointer-events: none; }
 
-/* export zone */
-.export-bar {
-margin-top: 24px; padding: 14px 18px;
-background: var(–gofun); border-radius: var(–r2);
+/* ═══════════════════════════════════
+UNSCHEDULED POOL (main page)
+═══════════════════════════════════ */
+.unscheduled-section {
+background: rgba(255,255,255,0.5);
+border-radius: var(–r2);
 border: 1px solid var(–border);
-display: flex; align-items: center; justify-content: space-between;
-flex-wrap: wrap; gap: 10px;
+padding: 14px 16px;
+box-shadow: var(–shadow);
+}
+.section-title {
+font-family: ‘Noto Serif TC’, serif;
+font-size: 0.78rem; font-weight: 600;
+letter-spacing: 0.08em; color: var(–sumi2);
+margin-bottom: 10px;
+display: flex; align-items: center; gap: 6px;
+}
+.section-title .s-count {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem; color: var(–nezumi);
+background: var(–washi); padding: 1px 7px;
+border-radius: 10px;
+}
+.unscheduled-grid {
+display: flex; flex-wrap: wrap; gap: 7px;
+}
+.unsched-chip {
+display: flex; align-items: center; gap: 6px;
+padding: 8px 12px; border-radius: 9px;
+font-size: clamp(0.72rem, 1.5vw, 0.8rem);
+cursor: pointer; transition: all 0.18s;
+border: 1.5px solid transparent;
+user-select: none;
+font-family: ‘Noto Serif TC’, serif;
+font-weight: 500;
+}
+.unsched-chip:hover { transform: translateY(-2px); box-shadow: var(–shadow2); filter: brightness(1.06); }
+.unsched-chip:active { transform: scale(0.96); }
+.unsched-chip.selected {
+outline: 2.5px solid var(–sumi);
+transform: scale(0.97);
+}
+.unsched-chip .chip-count {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.6rem; opacity: 0.7;
+background: rgba(0,0,0,0.1); padding: 1px 5px;
+border-radius: 8px;
+}
+.unsched-empty {
+font-size: 0.75rem; color: var(–nezumi);
+font-style: italic; padding: 4px 0;
+}
+
+/* export bar */
+.export-bar {
+padding: 12px 16px;
+background: var(–gofun);
+border-radius: var(–r2);
+border: 1px solid var(–border);
+display: flex; align-items: center;
+justify-content: space-between; flex-wrap: wrap; gap: 8px;
 }
 .export-bar span {
-font-size: 0.78rem; color: var(–sumi2);
+font-size: 0.75rem; color: var(–sumi2);
 font-family: ‘Noto Serif TC’, serif;
 }
-.export-btns { display: flex; gap: 8px; }
 
-/* ── SETTINGS PAGE ── */
-#page-settings .nav {
-background: rgba(237,232,223,0.90);
+/* pick-mode banner */
+.pick-banner {
+display: none;
+position: sticky; bottom: 12px;
+margin: 0 16px;
+background: var(–sumi);
+color: var(–shiro);
+border-radius: 30px;
+padding: 11px 20px;
+font-size: 0.78rem;
+font-family: ‘Noto Serif TC’, serif;
+letter-spacing: 0.04em;
+text-align: center;
+box-shadow: var(–shadow2);
+z-index: 40;
+animation: slideUp 0.25s ease;
+cursor: pointer;
 }
+.pick-banner.show { display: block; }
+@keyframes slideUp {
+from { transform: translateY(20px); opacity: 0; }
+to { transform: none; opacity: 1; }
+}
+
+/* ═══════════════════════════════════
+SETTINGS PAGE
+═══════════════════════════════════ */
+#page-settings { background: var(–gofun); }
+#page-settings .nav { background: rgba(237,232,223,0.92); }
+
 .settings-body {
-padding: 24px; max-width: 860px; margin: 0 auto;
-display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+flex: 1; padding: 16px;
+display: flex; flex-direction: column; gap: 14px;
+max-width: 860px; width: 100%; margin: 0 auto;
 }
-@media(max-width:640px){ .settings-body { grid-template-columns: 1fr; } }
+
+/* two-col on tablet+ */
+.settings-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 14px;
+}
+@media(max-width: 600px) {
+.settings-grid { grid-template-columns: 1fr; }
+}
 
 .card {
 background: var(–shiro);
 border-radius: var(–r2);
 border: 1px solid var(–border);
-padding: 20px; box-shadow: var(–shadow);
+padding: 16px; box-shadow: var(–shadow);
 }
-.card.full { grid-column: 1/-1; }
 .card-title {
 font-family: ‘Noto Serif TC’, serif;
-font-size: 0.85rem; font-weight: 600;
-letter-spacing: 0.1em; color: var(–sumi);
-margin-bottom: 14px;
-padding-bottom: 10px; border-bottom: 1px solid var(–border);
-display: flex; align-items: center; gap: 6px;
+font-size: 0.82rem; font-weight: 600;
+letter-spacing: 0.08em; color: var(–sumi);
+margin-bottom: 12px;
+padding-bottom: 9px;
+border-bottom: 1px solid var(–border);
 }
 
-/* course pool */
-.pool-list { display: flex; flex-direction: column; gap: 6px; min-height: 40px; }
+/* course pool in settings */
+.pool-list { display: flex; flex-direction: column; gap: 6px; }
 .pool-chip {
 display: flex; align-items: center; gap: 8px;
-padding: 9px 12px; border-radius: 9px;
+padding: 9px 11px; border-radius: 9px;
 font-size: 0.78rem; cursor: grab;
 user-select: none; transition: all 0.15s;
-border: 1px solid transparent;
 }
 .pool-chip:hover { transform: translateX(3px); box-shadow: var(–shadow); }
 .pool-chip:active { cursor: grabbing; }
-.pool-chip.dragging { opacity: 0.4; }
-.pool-chip .c-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: rgba(255,255,255,0.5); }
-.pool-chip .c-name { font-weight: 500; flex: 1; font-family: ‘Noto Serif TC’, serif; }
-.pool-chip .c-room { font-size: 0.68rem; font-family: ‘DM Mono’, monospace; opacity: 0.7; }
-.pool-chip .c-del {
+.pool-chip.dragging { opacity: 0.35; }
+.c-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: rgba(255,255,255,0.55); }
+.c-name { font-weight: 500; flex: 1; font-family: ‘Noto Serif TC’, serif; }
+.c-room { font-size: 0.65rem; font-family: ‘DM Mono’, monospace; opacity: 0.7; }
+.c-sessions {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.62rem; opacity: 0.75;
+background: rgba(0,0,0,0.1); padding: 1px 6px; border-radius: 8px;
+}
+.c-del {
 width: 18px; height: 18px; border-radius: 50%;
-background: rgba(0,0,0,0.15); border: none;
+background: rgba(0,0,0,0.13); border: none;
 display: flex; align-items: center; justify-content: center;
-font-size: 0.58rem; color: #fff; cursor: pointer;
+font-size: 0.55rem; color: #fff; cursor: pointer;
 opacity: 0; transition: opacity 0.15s;
 }
 .pool-chip:hover .c-del { opacity: 1; }
 
+/* add course form */
 .add-form { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-.add-form input {
-padding: 9px 12px; border-radius: 9px;
+.add-form input, .add-form select {
+padding: 9px 11px; border-radius: 9px;
 border: 1.5px solid var(–border);
 background: var(–gofun); font-size: 0.78rem;
 font-family: ‘Noto Sans TC’, sans-serif;
-color: var(–sumi); outline: none; transition: border 0.15s;
-width: 100%;
+color: var(–sumi); outline: none;
+transition: border 0.15s; width: 100%;
 }
 .add-form input:focus { border-color: var(–kohaku); background: #fff; }
 .add-form input::placeholder { color: var(–nezumi); }
+.form-row { display: flex; gap: 8px; }
+.form-row input { flex: 1; }
+.sessions-row {
+display: flex; align-items: center; gap: 8px;
+font-size: 0.75rem; color: var(–sumi2);
+}
+.sessions-row label { flex-shrink: 0; }
+.sessions-row input[type=number] {
+width: 64px; text-align: center; flex: none;
+padding: 7px 8px;
+}
 
-/* color palette — jp muted */
-.jp-colors { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+/* jp color swatches */
+.jp-colors { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
 .jp-swatch {
-width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
-border: 2px solid transparent; transition: all 0.15s;
-position: relative;
+width: 24px; height: 24px; border-radius: 50%;
+cursor: pointer; border: 2px solid transparent;
+transition: all 0.15s; position: relative;
+flex-shrink: 0;
 }
 .jp-swatch:hover { transform: scale(1.2); }
 .jp-swatch.sel { border-color: var(–sumi); transform: scale(1.15); }
 .jp-swatch.sel::after {
 content: ‘✓’; position: absolute; inset: 0;
 display: flex; align-items: center; justify-content: center;
-font-size: 0.55rem; color: rgba(0,0,0,0.5);
+font-size: 0.5rem; color: rgba(0,0,0,0.45);
 }
 
-/* time settings */
-.time-slots-list { display: flex; flex-direction: column; gap: 6px; }
+/* time slots */
+.time-slots-list { display: flex; flex-direction: column; gap: 5px; }
 .time-row {
-display: flex; align-items: center; gap: 8px;
-padding: 8px 10px; border-radius: 9px;
+display: flex; align-items: center; gap: 6px;
+padding: 7px 10px; border-radius: 9px;
 background: var(–gofun); border: 1px solid var(–border);
-font-size: 0.75rem;
 }
-.time-row .tr-period {
-font-family: ‘DM Mono’, monospace; color: var(–nezumi);
-width: 20px; text-align: center; flex-shrink: 0;
+.tr-period {
+font-family: ‘DM Mono’, monospace; font-size: 0.62rem;
+color: var(–nezumi); width: 18px; text-align: center; flex-shrink: 0;
 }
 .time-row input[type=time] {
 padding: 3px 6px; border-radius: 6px;
 border: 1px solid var(–border); background: #fff;
-font-family: ‘DM Mono’, monospace; font-size: 0.73rem;
+font-family: ‘DM Mono’, monospace; font-size: 0.7rem;
 color: var(–sumi); outline: none; cursor: pointer;
+flex: 1; min-width: 0;
 }
 .time-row input[type=time]:focus { border-color: var(–kohaku); }
-.time-row .tr-sep { color: var(–nezumi); font-size: 0.7rem; }
-.time-row .tr-del {
-margin-left: auto; width: 18px; height: 18px;
-border-radius: 50%; background: var(–border);
-border: none; display: flex; align-items: center; justify-content: center;
-font-size: 0.55rem; color: var(–sumi2); cursor: pointer;
-transition: background 0.15s;
+.tr-sep { color: var(–nezumi); font-size: 0.68rem; flex-shrink: 0; }
+.tr-del {
+width: 18px; height: 18px; border-radius: 50%;
+background: var(–border); border: none;
+display: flex; align-items: center; justify-content: center;
+font-size: 0.52rem; color: var(–sumi2); cursor: pointer;
+flex-shrink: 0; transition: background 0.15s;
 }
-.time-row .tr-del:hover { background: var(–kurenai); color: #fff; }
+.tr-del:hover { background: var(–kurenai); color: #fff; }
 .time-add-btn {
 margin-top: 6px; padding: 7px; border-radius: 9px;
 border: 1.5px dashed var(–border); background: transparent;
@@ -331,12 +470,12 @@ font-size: 0.72rem; color: var(–nezumi); cursor: pointer;
 width: 100%; font-family: ‘Noto Sans TC’, sans-serif;
 transition: all 0.15s;
 }
-.time-add-btn:hover { border-color: var(–kohaku); color: var(–kohaku); background: rgba(201,149,108,0.05); }
+.time-add-btn:hover { border-color: var(–kohaku); color: var(–kohaku); }
 
-/* day & display settings */
+/* day toggle */
 .toggle-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .toggle-chip {
-padding: 6px 14px; border-radius: 20px;
+padding: 6px 13px; border-radius: 20px;
 border: 1px solid var(–border); background: transparent;
 font-size: 0.72rem; cursor: pointer; color: var(–sumi2);
 font-family: ‘Noto Sans TC’, sans-serif; transition: all 0.15s;
@@ -344,9 +483,12 @@ font-family: ‘Noto Sans TC’, sans-serif; transition: all 0.15s;
 .toggle-chip:hover { background: var(–washi); }
 .toggle-chip.on { background: var(–sumi); color: var(–shiro); border-color: var(–sumi); }
 
-/* background picker */
-.bg-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
-@media(max-width:400px){ .bg-grid { grid-template-columns: repeat(3,1fr); } }
+/* bg grid */
+.bg-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+gap: 7px;
+}
 .bg-thumb {
 aspect-ratio: 3/2; border-radius: 9px; cursor: pointer;
 overflow: hidden; border: 2.5px solid transparent;
@@ -355,94 +497,109 @@ background-size: cover; background-position: center;
 }
 .bg-thumb:hover { transform: scale(1.04); }
 .bg-thumb.on { border-color: var(–kohaku); }
-.bg-thumb .bg-name {
+.bg-name {
 position: absolute; bottom: 0; left: 0; right: 0;
 background: linear-gradient(transparent, rgba(0,0,0,0.5));
-color: #fff; font-size: 0.58rem; padding: 4px 5px 3px;
+color: #fff; font-size: 0.58rem; padding: 3px 4px 2px;
 font-family: ‘Noto Serif TC’, serif;
 }
 .bg-upload-slot {
 aspect-ratio: 3/2; border-radius: 9px; cursor: pointer;
 border: 1.5px dashed var(–border);
 display: flex; flex-direction: column; align-items: center;
-justify-content: center; gap: 3px;
-color: var(–nezumi); font-size: 0.6rem;
+justify-content: center; gap: 2px;
+color: var(–nezumi); font-size: 0.58rem;
 background: var(–gofun); transition: all 0.15s;
 font-family: ‘Noto Sans TC’, sans-serif;
 }
 .bg-upload-slot:hover { border-color: var(–kohaku); color: var(–kohaku); }
-.bg-upload-slot .icon { font-size: 1.2rem; }
 
-/* note / label settings */
-.label-row { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; }
+/* label input */
+.label-row {
+display: flex; align-items: center; gap: 8px;
+font-size: 0.75rem;
+}
 .label-row label { color: var(–sumi2); flex-shrink: 0; }
 .label-row input {
 flex: 1; padding: 7px 10px; border-radius: 8px;
 border: 1.5px solid var(–border); background: var(–gofun);
 font-size: 0.75rem; font-family: ‘Noto Serif TC’, serif;
 color: var(–sumi); outline: none;
+transition: border 0.15s;
 }
 .label-row input:focus { border-color: var(–kohaku); background: #fff; }
 
-/* ── MODAL ── */
+/* empty hints */
+.empty-hint {
+font-size: 0.72rem; color: var(–nezumi);
+text-align: center; padding: 8px 0; font-style: italic;
+}
+
+/* ═══════════════════════════════════
+MODAL
+═══════════════════════════════════ */
 .modal-mask {
 position: fixed; inset: 0; z-index: 200;
-background: rgba(40,38,35,0.40); backdrop-filter: blur(6px);
+background: rgba(40,38,35,0.42); backdrop-filter: blur(6px);
 display: flex; align-items: center; justify-content: center;
-opacity: 0; pointer-events: none; transition: opacity 0.25s;
+padding: 16px;
+opacity: 0; pointer-events: none; transition: opacity 0.22s;
 }
 .modal-mask.open { opacity: 1; pointer-events: all; }
 .modal-box {
 background: var(–shiro); border-radius: var(–r2);
-padding: 26px; width: 320px; max-width: 92vw;
+padding: 22px; width: 100%; max-width: 320px;
 box-shadow: var(–shadow2);
-transform: translateY(16px) scale(0.97);
-transition: transform 0.25s;
+transform: translateY(14px) scale(0.97);
+transition: transform 0.22s;
 border: 1px solid var(–border);
 }
 .modal-mask.open .modal-box { transform: none; }
 .modal-box h3 {
 font-family: ‘Noto Serif TC’, serif;
-font-size: 0.92rem; margin-bottom: 16px;
-color: var(–sumi);
+font-size: 0.9rem; margin-bottom: 14px; color: var(–sumi);
 }
 .modal-box label {
-display: block; font-size: 0.7rem; color: var(–nezumi);
-margin-bottom: 5px; margin-top: 12px; letter-spacing: 0.05em;
+display: block; font-size: 0.68rem; color: var(–nezumi);
+margin-bottom: 4px; margin-top: 11px; letter-spacing: 0.04em;
 }
 .modal-box input, .modal-box select {
-width: 100%; padding: 9px 12px; border-radius: 9px;
+width: 100%; padding: 9px 11px; border-radius: 9px;
 border: 1.5px solid var(–border); background: var(–gofun);
 font-size: 0.8rem; font-family: ‘Noto Sans TC’, sans-serif;
 color: var(–sumi); outline: none; transition: border 0.15s;
 }
 .modal-box input:focus { border-color: var(–kohaku); background: #fff; }
-.modal-btns { display: flex; gap: 8px; margin-top: 20px; }
+.modal-btns { display: flex; gap: 8px; margin-top: 18px; }
 .modal-btns button {
 flex: 1; padding: 9px; border-radius: 30px;
 border: 1px solid var(–border); cursor: pointer;
 font-size: 0.75rem; font-family: ‘Noto Sans TC’, sans-serif;
 transition: all 0.18s;
 }
-.modal-btns .m-cancel { background: transparent; color: var(–sumi2); }
-.modal-btns .m-cancel:hover { background: var(–washi); }
-.modal-btns .m-ok { background: var(–sumi); color: var(–shiro); border-color: var(–sumi); }
-.modal-btns .m-ok:hover { background: var(–sumi2); }
+.m-cancel { background: transparent; color: var(–sumi2); }
+.m-cancel:hover { background: var(–washi); }
+.m-ok { background: var(–sumi); color: var(–shiro); border-color: var(–sumi); }
+.m-ok:hover { background: var(–sumi2); }
 
-/* ── TOAST ── */
+/* ═══════════════════════════════════
+TOAST
+═══════════════════════════════════ */
 .toast {
-position: fixed; bottom: 30px; left: 50%;
-transform: translateX(-50%) translateY(50px);
+position: fixed; bottom: 28px; left: 50%;
+transform: translateX(-50%) translateY(60px);
 background: var(–sumi); color: var(–shiro);
-padding: 9px 22px; border-radius: 30px;
+padding: 9px 20px; border-radius: 30px;
 font-size: 0.75rem; z-index: 300;
-transition: transform 0.28s; pointer-events: none;
-font-family: ‘Noto Serif TC’, serif; letter-spacing: 0.05em;
-white-space: nowrap;
+transition: transform 0.28s cubic-bezier(.34,1.56,.64,1);
+pointer-events: none;
+font-family: ‘Noto Serif TC’, serif;
+white-space: nowrap; max-width: 90vw;
+overflow: hidden; text-overflow: ellipsis;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ── BG LAYER ── */
+/* bg layers */
 #bg-layer {
 position: fixed; inset: 0; z-index: -1;
 background-size: cover; background-position: center;
@@ -450,23 +607,23 @@ transition: all 0.6s ease;
 }
 #bg-overlay {
 position: fixed; inset: 0; z-index: 0;
-transition: background 0.5s;
-pointer-events: none;
+transition: background 0.5s; pointer-events: none;
 }
-.page { z-index: 1; }
+.page { position: relative; z-index: 1; }
 
-.empty-hint {
-font-size: 0.72rem; color: var(–nezumi);
-text-align: center; padding: 10px 0; font-style: italic;
+/* ═══════════════════════════════════
+RESPONSIVE TWEAKS
+═══════════════════════════════════ */
+@media (max-width: 480px) {
+.nav { padding: 0 10px; }
+.main-body, .settings-body { padding: 10px; }
+table.tt { min-width: 340px; }
+.btn { padding: 6px 10px; }
+.nav-title { max-width: 120px; }
 }
-
-/* range slider for today highlight */
-.today-badge {
-display: inline-block;
-padding: 2px 8px; border-radius: 10px;
-background: var(–kohaku); color: #fff;
-font-size: 0.6rem; font-family: ‘DM Mono’, monospace;
-margin-left: 4px; vertical-align: middle;
+@media (min-width: 768px) {
+.main-body { padding: 20px 24px; }
+.settings-body { padding: 20px 24px; }
 }
 </style>
 
@@ -476,107 +633,132 @@ margin-left: 4px; vertical-align: middle;
 <div id="bg-layer"></div>
 <div id="bg-overlay"></div>
 
-<!-- ═══ MAIN PAGE ═══ -->
+<!-- ════════════════════════════════
+     MAIN PAGE
+════════════════════════════════ -->
 
 <div class="page active" id="page-main">
   <nav class="nav">
-    <div class="nav-logo">
-      時間割
-      <span class="kanji">JIKANWARI</span>
+    <div class="nav-title-wrap">
+      <div class="nav-title" id="navTitle" onclick="editTitle()">時間割</div>
+      <span class="nav-title-edit-btn" onclick="editTitle()" title="修改名稱">✎</span>
     </div>
     <div class="nav-actions">
-      <button class="nav-btn" onclick="exportPNG()">↓ 匯出</button>
-      <button class="nav-btn settings-btn" onclick="goSettings()">⚙ 編輯課表</button>
+      <button class="btn" onclick="exportPNG()">↓ 匯出</button>
+      <button class="btn orange" onclick="goSettings()">⚙ 編輯</button>
     </div>
   </nav>
 
   <div class="main-body">
     <div class="week-strip" id="weekStrip"></div>
-    <div class="tt-scroll" id="ttExportTarget">
-      <table class="tt" id="ttTable"></table>
-    </div>
 
 ```
+<div class="tt-card">
+  <div class="tt-scroll" id="ttExportTarget">
+    <table class="tt" id="ttTable"></table>
+  </div>
+</div>
+
+<!-- unscheduled pool -->
+<div class="unscheduled-section" id="unschedSection">
+  <div class="section-title">
+    待安排課程
+    <span class="s-count" id="unschedCount">0</span>
+  </div>
+  <div class="unscheduled-grid" id="unschedGrid"></div>
+</div>
+
 <div class="export-bar">
   <span>匯出課表為圖片</span>
-  <div class="export-btns">
-    <button class="nav-btn" onclick="exportPNG()">↓ PNG 圖片</button>
-  </div>
+  <button class="btn primary" onclick="exportPNG()">↓ PNG</button>
 </div>
 ```
 
   </div>
+
+  <div class="pick-banner" id="pickBanner" onclick="cancelPickMode()">
+    點選課表格子放入 ── 點此取消
+  </div>
 </div>
 
-<!-- ═══ SETTINGS PAGE ═══ -->
+<!-- ════════════════════════════════
+     SETTINGS PAGE
+════════════════════════════════ -->
 
 <div class="page" id="page-settings">
   <nav class="nav">
-    <div class="nav-logo">
-      設定
-      <span class="kanji">SETTINGS</span>
+    <div class="nav-title-wrap">
+      <div class="nav-title">設定</div>
     </div>
     <div class="nav-actions">
-      <button class="nav-btn accent" onclick="goMain()">← 返回課表</button>
+      <button class="btn primary" onclick="goMain()">← 返回</button>
     </div>
   </nav>
 
   <div class="settings-body">
 
 ```
-<!-- COURSE POOL -->
-<div class="card full">
-  <div class="card-title">📚 課程庫
-    <span style="font-size:0.65rem;color:var(--nezumi);font-weight:300;margin-left:4px">拖曳到課表格子 或 點選放入</span>
-  </div>
+<!-- Course pool card (full width) -->
+<div class="card">
+  <div class="card-title">📚 課程庫</div>
   <div class="pool-list" id="coursePool"></div>
   <div class="add-form">
-    <input id="inName" placeholder="課程名稱（必填）" maxlength="18">
-    <input id="inRoom" placeholder="教室 / 老師（選填）" maxlength="16">
+    <input id="inName" placeholder="課程名稱（必填）" maxlength="20">
+    <div class="form-row">
+      <input id="inRoom" placeholder="教室／老師（選填）" maxlength="16">
+    </div>
+    <div class="sessions-row">
+      <label>堂數</label>
+      <input type="number" id="inSessions" value="1" min="1" max="20">
+      <span style="font-size:0.7rem;color:var(--nezumi)">堂（前台顯示可選次數）</span>
+    </div>
     <div class="jp-colors" id="colorPicker"></div>
-    <button class="nav-btn accent" style="width:100%;border-radius:10px;padding:10px;font-size:0.75rem" onclick="addCourse()">＋ 新增課程</button>
+    <button class="btn primary" style="border-radius:10px;padding:10px;width:100%;justify-content:center" onclick="addCourse()">＋ 新增課程</button>
   </div>
 </div>
 
-<!-- TIME SETTINGS -->
-<div class="card">
-  <div class="card-title">🕐 節次時間設定</div>
-  <div class="time-slots-list" id="timeSlotsList"></div>
-  <button class="time-add-btn" onclick="addTimeSlot()">＋ 新增節次</button>
-</div>
-
-<!-- DAY SETTINGS -->
-<div class="card">
-  <div class="card-title">📅 顯示天數</div>
-  <div class="toggle-row" id="dayToggle"></div>
-  <div style="margin-top:16px" class="card-title">🏷 課表標題</div>
-  <div class="label-row">
-    <label>標題</label>
-    <input id="ttTitle" value="我的課表" maxlength="16" oninput="renderMain()">
+<div class="settings-grid">
+  <!-- time slots -->
+  <div class="card">
+    <div class="card-title">🕐 節次時間</div>
+    <div class="time-slots-list" id="timeSlotsList"></div>
+    <button class="time-add-btn" onclick="addTimeSlot()">＋ 新增節次</button>
   </div>
-</div>
 
-<!-- BACKGROUNDS -->
-<div class="card full">
-  <div class="card-title">🖼 背景主題</div>
-  <div class="bg-grid" id="bgGrid"></div>
+  <!-- day + display -->
+  <div class="card">
+    <div class="card-title">📅 顯示天數</div>
+    <div class="toggle-row" id="dayToggle"></div>
+
+    <div style="margin-top:16px;margin-bottom:10px" class="card-title">🏷 課表名稱</div>
+    <div class="label-row">
+      <label>名稱</label>
+      <input id="settingTitle" maxlength="20" oninput="syncTitle(this.value)" placeholder="時間割">
+    </div>
+  </div>
+
+  <!-- backgrounds (full) -->
+  <div class="card" style="grid-column:1/-1">
+    <div class="card-title">🖼 背景主題</div>
+    <div class="bg-grid" id="bgGrid"></div>
+  </div>
 </div>
 ```
 
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL: slot fill -->
 
 <div class="modal-mask" id="modal">
   <div class="modal-box">
     <h3 id="mTitle">放入課程</h3>
-    <label>選擇課程 或 直接輸入</label>
+    <label>從課程庫選擇</label>
     <select id="mSelect" onchange="mSelectChange()">
       <option value="">── 手動輸入 ──</option>
     </select>
     <label>課程名稱</label>
-    <input id="mName" placeholder="數學" maxlength="18">
+    <input id="mName" placeholder="數學" maxlength="20">
     <label>教室（選填）</label>
     <input id="mRoom" placeholder="A101" maxlength="16">
     <label>顏色</label>
@@ -588,65 +770,75 @@ margin-left: 4px; vertical-align: middle;
   </div>
 </div>
 
+<!-- MODAL: edit title -->
+
+<div class="modal-mask" id="modalTitle">
+  <div class="modal-box">
+    <h3>修改課表名稱</h3>
+    <label>名稱</label>
+    <input id="titleInput" maxlength="20" placeholder="時間割">
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeTitleModal()">取消</button>
+      <button class="m-ok" onclick="confirmTitle()">確認</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <input type="file" id="bgUpload" accept="image/*" style="display:none" onchange="handleBgUpload(event)">
 
 <script>
-// ══════════════════════════════════════
-//  JAPANESE PALETTE — 低飽和
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   JAPANESE PALETTE
+════════════════════════════════ */
 const JP_COLORS = [
-  { bg:'#d4c5b0', text:'#3d3631', name:'白茶' },   // shiracha
-  { bg:'#bfb59e', text:'#32291e', name:'砂色' },   // suna
-  { bg:'#c8b89a', text:'#3a2c1a', name:'小麦' },   // komugi
-  { bg:'#c4ad6e', text:'#3d3010', name:'芥子' },   // karashi
-  { bg:'#a89a7c', text:'#2e2510', name:'薄茶' },   // usucha
-  { bg:'#b3c4b0', text:'#253022', name:'薄緑' },   // usumidori
-  { bg:'#8eaa8c', text:'#1d3021', name:'萌黄' },   // moegi
-  { bg:'#7a9e7e', text:'#1a2e1c', name:'苔色' },   // koke
-  { bg:'#a8becc', text:'#1c2f3a', name:'水色' },   // mizu
-  { bg:'#7394b0', text:'#162030', name:'縹' },     // hanada
-  { bg:'#8faabf', text:'#1a2c38', name:'藍鼠' },   // ainezumi
-  { bg:'#b5a8c8', text:'#2a2040', name:'藤' },     // fuji
-  { bg:'#a89ab5', text:'#241c30', name:'桔梗' },   // kikyo
-  { bg:'#c4a0a0', text:'#3a1c1c', name:'薄紅' },   // usukurenai
-  { bg:'#b5706a', text:'#fff',    name:'紅' },     // kurenai
-  { bg:'#c9956c', text:'#3d2010', name:'琥珀' },   // kohaku
+  {bg:'#d4c5b0',text:'#3d3631',name:'白茶'},
+  {bg:'#bfb59e',text:'#32291e',name:'砂色'},
+  {bg:'#c8b89a',text:'#3a2c1a',name:'小麦'},
+  {bg:'#c4ad6e',text:'#3d3010',name:'芥子'},
+  {bg:'#a89a7c',text:'#2e2510',name:'薄茶'},
+  {bg:'#b3c4b0',text:'#253022',name:'薄緑'},
+  {bg:'#8eaa8c',text:'#1d3021',name:'萌黄'},
+  {bg:'#7a9e7e',text:'#1a2e1c',name:'苔色'},
+  {bg:'#a8becc',text:'#1c2f3a',name:'水色'},
+  {bg:'#7394b0',text:'#162030',name:'縹'},
+  {bg:'#8faabf',text:'#1a2c38',name:'藍鼠'},
+  {bg:'#b5a8c8',text:'#2a2040',name:'藤'},
+  {bg:'#a89ab5',text:'#241c30',name:'桔梗'},
+  {bg:'#c4a0a0',text:'#3a1c1c',name:'薄紅'},
+  {bg:'#b5706a',text:'#fff',   name:'紅'},
+  {bg:'#c9956c',text:'#3d2010',name:'琥珀'},
 ];
 
-// ══════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
 const DAYS_ALL = ['一','二','三','四','五','六','日'];
-let activeDays = [0,1,2,3,4]; // indices into DAYS_ALL
-
-let timeSlots = [
-  {start:'08:00',end:'08:50'},
-  {start:'09:00',end:'09:50'},
-  {start:'10:00',end:'10:50'},
-  {start:'11:00',end:'11:50'},
-  {start:'13:00',end:'13:50'},
-  {start:'14:00',end:'14:50'},
-  {start:'15:00',end:'15:50'},
-  {start:'16:00',end:'16:50'},
+let activeDays  = [0,1,2,3,4];
+let timeSlots   = [
+  {start:'08:00',end:'08:50'},{start:'09:00',end:'09:50'},
+  {start:'10:00',end:'10:50'},{start:'11:00',end:'11:50'},
+  {start:'13:00',end:'13:50'},{start:'14:00',end:'14:50'},
+  {start:'15:00',end:'15:50'},{start:'16:00',end:'16:50'},
 ];
+let courses       = [];   // {id, name, room, colorIdx, sessions}
+let schedule      = {};   // `di-si` → {name,room,colorIdx,courseId?}
+let selColorIdx   = 0;
+let mColorIdx     = 0;
+let pendingSlot   = null; // {di,si}
+let pickModeCourse= null; // courseId being placed
+let dragCourseId  = null;
+let bgActive      = 0;
+let customBgUrl   = null;
+let appTitle      = '時間割';
 
-let courses = []; // {id, name, room, colorIdx}
-let schedule = {}; // key `d-s` → {name,room,colorIdx}
-let selColorIdx = 0;   // settings color pick
-let mColorIdx = 0;     // modal color pick
-let pendingSlot = null;  // {d,s}
-let pendingPickMode = null; // courseId to place
-let dragCourseId = null;
-let bgActive = 0;
-let customBgDataUrl = null;
-
-// ══════════════════════════════════════
-//  NAVIGATION
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   NAVIGATION
+════════════════════════════════ */
 function goSettings() {
   document.getElementById('page-main').classList.remove('active');
   document.getElementById('page-settings').classList.add('active');
+  cancelPickMode();
   renderSettings();
 }
 function goMain() {
@@ -655,55 +847,75 @@ function goMain() {
   renderMain();
 }
 
-// ══════════════════════════════════════
-//  MAIN PAGE RENDER
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   TITLE EDITING
+════════════════════════════════ */
+function editTitle() {
+  document.getElementById('titleInput').value = appTitle;
+  document.getElementById('modalTitle').classList.add('open');
+  setTimeout(() => document.getElementById('titleInput').select(), 100);
+}
+function closeTitleModal() {
+  document.getElementById('modalTitle').classList.remove('open');
+}
+function confirmTitle() {
+  const v = document.getElementById('titleInput').value.trim();
+  if (v) { appTitle = v; }
+  document.getElementById('navTitle').textContent = appTitle;
+  document.getElementById('settingTitle').value = appTitle;
+  closeTitleModal();
+}
+function syncTitle(v) {
+  appTitle = v || '時間割';
+  document.getElementById('navTitle').textContent = appTitle;
+}
+
+/* ════════════════════════════════
+   MAIN PAGE RENDER
+════════════════════════════════ */
 function renderMain() {
   renderWeekStrip();
   renderTT();
+  renderUnscheduled();
 }
+
 function renderWeekStrip() {
   const strip = document.getElementById('weekStrip');
-  const today = new Date().getDay(); // 0=sun
-  const todayIdx = today === 0 ? 6 : today - 1; // convert to mon=0
+  const raw   = new Date().getDay();
+  const todayIdx = raw === 0 ? 6 : raw - 1;
   strip.innerHTML = '';
   activeDays.forEach(di => {
-    const btn = document.createElement('div');
-    btn.className = 'week-chip' + (di === todayIdx ? ' active' : '');
-    btn.innerHTML = `週${DAYS_ALL[di]}${di === todayIdx ? '<span class="today-badge">今日</span>' : ''}`;
-    strip.appendChild(btn);
+    const chip = document.createElement('div');
+    chip.className = 'week-chip' + (di === todayIdx ? ' today' : '');
+    chip.innerHTML = `週${DAYS_ALL[di]}${di === todayIdx ? '<span class="today-dot"></span>' : ''}`;
+    strip.appendChild(chip);
   });
 }
+
 function renderTT() {
   const table = document.getElementById('ttTable');
-  // header
+  const inPick = pickModeCourse !== null;
   let html = '<thead><tr><th class="th-time"></th>';
-  activeDays.forEach(di => {
-    html += `<th>週${DAYS_ALL[di]}</th>`;
-  });
+  activeDays.forEach(di => { html += `<th>週${DAYS_ALL[di]}</th>`; });
   html += '</tr></thead><tbody>';
-
   timeSlots.forEach((ts, si) => {
     html += '<tr>';
-    html += `<td class="time-cell">
-      <span class="t-period">${si+1}</span>
-      <span class="t-time">${ts.start}</span>
-    </td>`;
-    activeDays.forEach((di, col) => {
-      const key = `${di}-${si}`;
+    html += `<td class="time-cell"><span class="t-period">${si+1}</span><span class="t-time">${ts.start}</span></td>`;
+    activeDays.forEach(di => {
+      const key   = `${di}-${si}`;
       const entry = schedule[key];
       if (entry) {
         const c = JP_COLORS[entry.colorIdx] || JP_COLORS[0];
         html += `<td class="slot filled" data-key="${key}">
           <div class="slot-inner" style="background:${c.bg};color:${c.text}">
             <span class="slot-name">${entry.name}</span>
-            ${entry.room ? `<span class="slot-room">${entry.room}</span>`:''}
+            ${entry.room ? `<span class="slot-room">${entry.room}</span>` : ''}
             <span class="slot-time-tag">${ts.start}–${ts.end}</span>
             <button class="slot-del" onclick="removeSlot('${key}')">✕</button>
           </div>
         </td>`;
       } else {
-        html += `<td class="slot empty" data-di="${di}" data-si="${si}" data-key="${key}" onclick="slotClick(${di},${si})">
+        html += `<td class="slot empty${inPick?' pick-mode':''}" data-di="${di}" data-si="${si}" onclick="slotClick(${di},${si})">
           <span class="slot-plus">＋</span>
         </td>`;
       }
@@ -713,60 +925,131 @@ function renderTT() {
   html += '</tbody>';
   table.innerHTML = html;
 
-  // drag-drop listeners
+  // drag-drop
   table.querySelectorAll('td.slot.empty').forEach(td => {
     td.addEventListener('dragover', e => { e.preventDefault(); td.classList.add('drag-over'); });
     td.addEventListener('dragleave', () => td.classList.remove('drag-over'));
     td.addEventListener('drop', e => {
       e.preventDefault(); td.classList.remove('drag-over');
-      if (dragCourseId !== null) {
-        const di = parseInt(td.dataset.di), si = parseInt(td.dataset.si);
-        placeCourse(dragCourseId, di, si);
-      }
+      if (dragCourseId != null)
+        placeFromCourse(dragCourseId, parseInt(td.dataset.di), parseInt(td.dataset.si));
     });
   });
 }
 
-// ══════════════════════════════════════
-//  SLOT INTERACTION
-// ══════════════════════════════════════
+/* ── unscheduled ── */
+function renderUnscheduled() {
+  const grid  = document.getElementById('unschedGrid');
+  const count = document.getElementById('unschedCount');
+
+  // count how many times each course is already in schedule
+  const placed = {};
+  Object.values(schedule).forEach(e => {
+    if (e.courseId != null) placed[e.courseId] = (placed[e.courseId]||0) + 1;
+  });
+
+  // build chips: one per remaining slot
+  const chips = [];
+  courses.forEach(c => {
+    const used = placed[c.id] || 0;
+    const remaining = c.sessions - used;
+    if (remaining > 0) chips.push({c, remaining});
+  });
+
+  count.textContent = chips.reduce((a,x)=>a+x.remaining, 0);
+  grid.innerHTML = '';
+
+  if (!chips.length) {
+    grid.innerHTML = '<span class="unsched-empty">所有課程都已安排完畢 ✓</span>';
+    return;
+  }
+
+  chips.forEach(({c, remaining}) => {
+    const col  = JP_COLORS[c.colorIdx] || JP_COLORS[0];
+    const chip = document.createElement('div');
+    chip.className = 'unsched-chip' + (pickModeCourse === c.id ? ' selected' : '');
+    chip.style.background  = col.bg;
+    chip.style.color       = col.text;
+    chip.innerHTML = `${c.name}${c.room?`<span style="font-size:0.65rem;opacity:.7;font-family:'DM Mono',monospace"> ${c.room}</span>`:''}
+      <span class="chip-count">×${remaining}</span>`;
+    chip.draggable = true;
+    chip.addEventListener('dragstart', e => {
+      dragCourseId = c.id; chip.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+    chip.addEventListener('dragend', () => { dragCourseId = null; chip.classList.remove('dragging'); });
+    chip.addEventListener('click', () => {
+      if (pickModeCourse === c.id) { cancelPickMode(); return; }
+      pickModeCourse = c.id;
+      renderTT();
+      renderUnscheduled();
+      const banner = document.getElementById('pickBanner');
+      banner.textContent = `點選課表格子放入「${c.name}」── 點此取消`;
+      banner.classList.add('show');
+    });
+    grid.appendChild(chip);
+  });
+}
+
+/* ════════════════════════════════
+   PICK MODE
+════════════════════════════════ */
+function cancelPickMode() {
+  pickModeCourse = null;
+  document.getElementById('pickBanner').classList.remove('show');
+  renderTT();
+  renderUnscheduled();
+}
+
+/* ════════════════════════════════
+   SLOT INTERACTION
+════════════════════════════════ */
 function slotClick(di, si) {
-  if (pendingPickMode !== null) {
-    placeCourse(pendingPickMode, di, si);
-    pendingPickMode = null;
+  if (pickModeCourse != null) {
+    placeFromCourse(pickModeCourse, di, si);
+    // check if more remaining; if none, cancel pick mode
+    const used = Object.values(schedule).filter(e => e.courseId === pickModeCourse).length;
+    const c    = courses.find(x => x.id === pickModeCourse);
+    if (!c || used >= c.sessions) cancelPickMode();
+    else { renderTT(); renderUnscheduled(); } // keep pick mode
     return;
   }
   openModal(di, si);
 }
-function placeCourse(courseId, di, si) {
+
+function placeFromCourse(courseId, di, si) {
   const c = courses.find(x => x.id === courseId);
   if (!c) return;
-  schedule[`${di}-${si}`] = { name:c.name, room:c.room, colorIdx:c.colorIdx };
-  renderTT(); toast(`「${c.name}」已放入週${DAYS_ALL[di]} 第${si+1}節`);
+  schedule[`${di}-${si}`] = {name:c.name, room:c.room, colorIdx:c.colorIdx, courseId:c.id};
+  toast(`「${c.name}」→ 週${DAYS_ALL[di]} 第${si+1}節`);
+  renderTT(); renderUnscheduled();
 }
-function removeSlot(key) { delete schedule[key]; renderTT(); }
 
-// ══════════════════════════════════════
-//  MODAL
-// ══════════════════════════════════════
+function removeSlot(key) {
+  delete schedule[key];
+  renderTT(); renderUnscheduled();
+}
+
+/* ════════════════════════════════
+   MODAL: slot fill
+════════════════════════════════ */
 function openModal(di, si) {
-  pendingSlot = { di, si };
-  mColorIdx = 0;
-  // populate select
-  const sel = document.getElementById('mSelect');
+  pendingSlot  = {di, si};
+  mColorIdx    = 0;
+  const sel    = document.getElementById('mSelect');
   sel.innerHTML = '<option value="">── 手動輸入 ──</option>';
   courses.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = c.name + (c.room ? ` (${c.room})` : '');
-    sel.appendChild(opt);
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = c.name + (c.room ? ` (${c.room})` : '');
+    sel.appendChild(o);
   });
   document.getElementById('mName').value = '';
   document.getElementById('mRoom').value = '';
   document.getElementById('mTitle').textContent = `放入 週${DAYS_ALL[di]} 第${si+1}節`;
   buildColorPicker('mColorPicker', () => mColorIdx, v => { mColorIdx = v; });
   document.getElementById('modal').classList.add('open');
-  setTimeout(() => document.getElementById('mName').focus(), 120);
+  setTimeout(() => document.getElementById('mName').focus(), 100);
 }
 function mSelectChange() {
   const sel = document.getElementById('mSelect');
@@ -782,9 +1065,11 @@ function confirmModal() {
   const name = document.getElementById('mName').value.trim();
   if (!name) { toast('請輸入課程名稱'); return; }
   const room = document.getElementById('mRoom').value.trim();
-  const { di, si } = pendingSlot;
-  schedule[`${di}-${si}`] = { name, room, colorIdx: mColorIdx };
-  closeModal(); renderTT();
+  const {di, si} = pendingSlot;
+  // find matching course id
+  const c = courses.find(x => x.name === name);
+  schedule[`${di}-${si}`] = {name, room, colorIdx: mColorIdx, courseId: c ? c.id : null};
+  closeModal(); renderTT(); renderUnscheduled();
   toast(`已放入「${name}」`);
 }
 function closeModal() {
@@ -794,60 +1079,68 @@ function closeModal() {
 document.getElementById('modal').addEventListener('click', e => {
   if (e.target === document.getElementById('modal')) closeModal();
 });
+document.getElementById('modalTitle').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalTitle')) closeTitleModal();
+});
 
-// ══════════════════════════════════════
-//  SETTINGS RENDER
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   SETTINGS RENDER
+════════════════════════════════ */
 function renderSettings() {
   renderPool();
   renderTimeSlots();
   renderDayToggle();
   renderBgGrid();
   buildColorPicker('colorPicker', () => selColorIdx, v => { selColorIdx = v; });
+  document.getElementById('settingTitle').value = appTitle;
 }
 
-// Course pool
+/* course pool */
 function renderPool() {
   const pool = document.getElementById('coursePool');
   if (!courses.length) { pool.innerHTML = '<div class="empty-hint">尚無課程，請在下方新增</div>'; return; }
   pool.innerHTML = '';
   courses.forEach(c => {
-    const col = JP_COLORS[c.colorIdx] || JP_COLORS[0];
+    const col  = JP_COLORS[c.colorIdx] || JP_COLORS[0];
     const chip = document.createElement('div');
-    chip.className = 'pool-chip';
-    chip.draggable = true;
-    chip.dataset.id = c.id;
+    chip.className = 'pool-chip'; chip.draggable = true;
     chip.style.background = col.bg; chip.style.color = col.text;
     chip.innerHTML = `<div class="c-dot"></div>
       <span class="c-name">${c.name}</span>
-      ${c.room ? `<span class="c-room">${c.room}</span>`:''}
-      <button class="c-del" title="刪除" onclick="event.stopPropagation();deleteCourse(${JSON.stringify(c.id)})">✕</button>`;
+      ${c.room ? `<span class="c-room">${c.room}</span>` : ''}
+      <span class="c-sessions">${c.sessions}堂</span>
+      <button class="c-del" onclick="event.stopPropagation();deleteCourse(${JSON.stringify(c.id)})">✕</button>`;
     chip.addEventListener('dragstart', e => {
       dragCourseId = c.id; chip.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'copy';
     });
-    chip.addEventListener('dragend', () => {
-      dragCourseId = null; chip.classList.remove('dragging');
-    });
-    chip.addEventListener('click', () => {
-      pendingPickMode = c.id;
-      goMain();
-      toast(`點擊課表格子放入「${c.name}」`);
-    });
+    chip.addEventListener('dragend', () => { dragCourseId = null; chip.classList.remove('dragging'); });
     pool.appendChild(chip);
   });
+}
+function deleteCourse(id) {
+  courses = courses.filter(x => x.id !== id);
+  Object.keys(schedule).forEach(k => { if (schedule[k].courseId === id) delete schedule[k]; });
+  renderPool();
 }
 function addCourse() {
   const name = document.getElementById('inName').value.trim();
   if (!name) { toast('請輸入課程名稱'); return; }
-  courses.push({ id: Date.now()+Math.random(), name, room: document.getElementById('inRoom').value.trim(), colorIdx: selColorIdx });
+  const sessions = Math.max(1, parseInt(document.getElementById('inSessions').value) || 1);
+  courses.push({
+    id: Date.now() + Math.random(),
+    name,
+    room: document.getElementById('inRoom').value.trim(),
+    colorIdx: selColorIdx,
+    sessions,
+  });
   document.getElementById('inName').value = '';
   document.getElementById('inRoom').value = '';
-  renderPool();
-  toast(`已新增「${name}」`);
+  document.getElementById('inSessions').value = '1';
+  renderPool(); toast(`已新增「${name}」× ${sessions}堂`);
 }
 
-// Time slots
+/* time slots */
 function renderTimeSlots() {
   const list = document.getElementById('timeSlotsList');
   list.innerHTML = '';
@@ -859,41 +1152,49 @@ function renderTimeSlots() {
       <input type="time" value="${ts.start}" onchange="timeSlots[${i}].start=this.value;renderMain()">
       <span class="tr-sep">—</span>
       <input type="time" value="${ts.end}" onchange="timeSlots[${i}].end=this.value;renderMain()">
-      <button class="tr-del" onclick="removeTimeSlot(${i})" title="刪除節次">✕</button>`;
+      <button class="tr-del" onclick="removeTimeSlot(${i})">✕</button>`;
     list.appendChild(row);
   });
 }
 function addTimeSlot() {
-  const last = timeSlots[timeSlots.length-1];
-  const [h,m] = (last?.end||'17:00').split(':').map(Number);
-  const newH = h + (m >= 50 ? 1 : 0);
-  const newM = m >= 50 ? 0 : m + 10;
-  const fmt = v => String(v).padStart(2,'0');
-  timeSlots.push({ start:`${fmt(newH)}:${fmt(newM)}`, end:`${fmt(newH+0)}:${fmt(newM+50>59?newM+50-60:newM+50)}` });
+  const last = timeSlots[timeSlots.length - 1];
+  const [h, m] = (last?.end || '17:00').split(':').map(Number);
+  const fmt = v => String(v).padStart(2, '0');
+  let sh = h, sm = m + 10;
+  if (sm >= 60) { sh++; sm -= 60; }
+  let eh = sh, em = sm + 50;
+  if (em >= 60) { eh++; em -= 60; }
+  timeSlots.push({start:`${fmt(sh)}:${fmt(sm)}`, end:`${fmt(eh)}:${fmt(em)}`});
   renderTimeSlots(); renderMain();
 }
 function removeTimeSlot(i) {
   if (timeSlots.length <= 1) { toast('至少保留一節'); return; }
-  // remove schedule entries for this slot
-  Object.keys(schedule).forEach(k => { if (k.endsWith(`-${i}`)) delete schedule[k]; });
+  Object.keys(schedule).forEach(k => { if (k.split('-')[1] == i) delete schedule[k]; });
+  // shift higher slot indices
+  const newSched = {};
+  Object.keys(schedule).forEach(k => {
+    const [di, si] = k.split('-').map(Number);
+    newSched[`${di}-${si > i ? si-1 : si}`] = schedule[k];
+  });
+  schedule = newSched;
   timeSlots.splice(i, 1);
   renderTimeSlots(); renderMain();
 }
 
-// Day toggle
+/* day toggle */
 function renderDayToggle() {
   const wrap = document.getElementById('dayToggle');
   wrap.innerHTML = '';
   DAYS_ALL.forEach((d, i) => {
     const btn = document.createElement('button');
-    btn.className = 'toggle-chip' + (activeDays.includes(i)?' on':'');
+    btn.className = 'toggle-chip' + (activeDays.includes(i) ? ' on' : '');
     btn.textContent = `週${d}`;
     btn.onclick = () => {
       if (activeDays.includes(i)) {
         if (activeDays.length <= 1) { toast('至少保留一天'); return; }
         activeDays = activeDays.filter(x => x !== i);
       } else {
-        activeDays.push(i); activeDays.sort((a,b)=>a-b);
+        activeDays.push(i); activeDays.sort((a,b) => a-b);
       }
       renderDayToggle(); renderMain();
     };
@@ -901,146 +1202,137 @@ function renderDayToggle() {
   });
 }
 
-// BG grid
+/* backgrounds */
 const BACKGROUNDS = [
-  { label:'原色', url:'', color:'#f5f2ec' },
-  { label:'海波', url:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80', color:'#7394b0' },
-  { label:'林間', url:'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=80', color:'#7a9e7e' },
-  { label:'山霧', url:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80', color:'#9b8fb5' },
-  { label:'夜空', url:'https://images.unsplash.com/photo-1504333638930-c8787321eee0?w=1200&q=80', color:'#3d3b37' },
-  { label:'和紙', url:'https://images.unsplash.com/photo-1595433706882-2de5ab8f34d7?w=1200&q=80', color:'#c8b89a' },
-  { label:'茶室', url:'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=1200&q=80', color:'#a89a7c' },
+  {label:'原色',  url:'',  color:'#f5f2ec'},
+  {label:'海波',  url:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80', color:'#7394b0'},
+  {label:'林間',  url:'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=80', color:'#7a9e7e'},
+  {label:'山霧',  url:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80', color:'#9b8fb5'},
+  {label:'夜空',  url:'https://images.unsplash.com/photo-1504333638930-c8787321eee0?w=1200&q=80', color:'#3d3b37'},
+  {label:'和紙',  url:'https://images.unsplash.com/photo-1595433706882-2de5ab8f34d7?w=1200&q=80', color:'#c8b89a'},
+  {label:'茶室',  url:'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=1200&q=80', color:'#a89a7c'},
 ];
 function renderBgGrid() {
   const grid = document.getElementById('bgGrid');
   grid.innerHTML = '';
   BACKGROUNDS.forEach((bg, i) => {
     const div = document.createElement('div');
-    div.className = 'bg-thumb' + (bgActive === i && !customBgDataUrl ? ' on' : '');
-    if (bg.url) div.style.backgroundImage = `url('${bg.url}')`;
-    else div.style.background = bg.color;
+    div.className = 'bg-thumb' + (bgActive === i && !customBgUrl ? ' on' : '');
+    div.style[bg.url ? 'backgroundImage' : 'background'] = bg.url ? `url('${bg.url}')` : bg.color;
     div.innerHTML = `<div class="bg-name">${bg.label}</div>`;
-    div.onclick = () => { bgActive = i; customBgDataUrl = null; applyBg(); renderBgGrid(); };
+    div.onclick = () => { bgActive = i; customBgUrl = null; applyBg(); renderBgGrid(); };
     grid.appendChild(div);
   });
-  // custom upload
   const up = document.createElement('div');
-  up.className = 'bg-upload-slot' + (customBgDataUrl ? ' on' : '');
-  if (customBgDataUrl) {
-    up.style.backgroundImage = `url('${customBgDataUrl}')`;
-    up.style.backgroundSize = 'cover'; up.style.color = '#fff';
-  }
-  up.innerHTML = `<span class="icon">＋</span><span>自訂</span>`;
+  up.className = 'bg-upload-slot' + (customBgUrl ? ' on' : '');
+  if (customBgUrl) { up.style.backgroundImage = `url('${customBgUrl}')`; up.style.backgroundSize='cover'; }
+  up.innerHTML = `<span style="font-size:1.1rem">＋</span><span>自訂</span>`;
   up.onclick = () => document.getElementById('bgUpload').click();
   grid.appendChild(up);
 }
 function applyBg() {
-  const layer = document.getElementById('bg-layer');
+  const layer   = document.getElementById('bg-layer');
   const overlay = document.getElementById('bg-overlay');
-  if (customBgDataUrl) {
-    layer.style.backgroundImage = `url('${customBgDataUrl}')`;
-    overlay.style.background = 'rgba(245,242,236,0.80)';
+  if (customBgUrl) {
+    layer.style.backgroundImage = `url('${customBgUrl}')`;
+    overlay.style.background    = 'rgba(245,242,236,0.80)';
   } else {
     const bg = BACKGROUNDS[bgActive];
     if (bg?.url) {
       layer.style.backgroundImage = `url('${bg.url}')`;
-      overlay.style.background = 'rgba(245,242,236,0.82)';
+      overlay.style.background    = 'rgba(245,242,236,0.82)';
     } else {
       layer.style.backgroundImage = '';
-      overlay.style.background = 'transparent';
+      overlay.style.background    = 'transparent';
     }
   }
 }
 function handleBgUpload(e) {
   const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    customBgDataUrl = ev.target.result;
-    bgActive = -1; applyBg(); renderBgGrid(); toast('已套用自訂背景');
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
+  const r = new FileReader();
+  r.onload = ev => { customBgUrl = ev.target.result; bgActive = -1; applyBg(); renderBgGrid(); toast('已套用自訂背景'); };
+  r.readAsDataURL(file); e.target.value = '';
 }
 
-// ══════════════════════════════════════
-//  COLOR PICKER BUILDER
-// ══════════════════════════════════════
-function buildColorPicker(containerId, getIdx, setIdx) {
-  const wrap = document.getElementById(containerId);
+/* color picker builder */
+function buildColorPicker(id, getIdx, setIdx) {
+  const wrap = document.getElementById(id);
   wrap.innerHTML = '';
   JP_COLORS.forEach((c, i) => {
     const s = document.createElement('div');
-    s.className = 'jp-swatch' + (getIdx() === i ? ' sel' : '');
-    s.style.background = c.bg;
-    s.title = c.name;
+    s.className  = 'jp-swatch' + (getIdx() === i ? ' sel' : '');
+    s.style.background = c.bg; s.title = c.name;
     s.onclick = () => {
       setIdx(i);
-      wrap.querySelectorAll('.jp-swatch').forEach((el,j) => el.classList.toggle('sel', j===i));
+      wrap.querySelectorAll('.jp-swatch').forEach((el, j) => el.classList.toggle('sel', j === i));
     };
     wrap.appendChild(s);
   });
 }
 
-// ══════════════════════════════════════
-//  EXPORT
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   EXPORT
+════════════════════════════════ */
 function exportPNG() {
   toast('正在生成圖片…');
   const s = document.createElement('script');
   s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
   s.onload = () => {
-    const target = document.getElementById('ttExportTarget');
-    html2canvas(target, { scale:2, useCORS:true, backgroundColor:'#f5f2ec', logging:false }).then(canvas => {
+    html2canvas(document.getElementById('ttExportTarget'), {
+      scale: 2, useCORS: true, backgroundColor: '#f5f2ec', logging: false
+    }).then(canvas => {
       const a = document.createElement('a');
-      a.download = '時間割.png'; a.href = canvas.toDataURL('image/png'); a.click();
+      a.download = `${appTitle}.png`; a.href = canvas.toDataURL('image/png'); a.click();
       toast('課表已匯出！');
     });
   };
   document.head.appendChild(s);
 }
 
-// ══════════════════════════════════════
-//  TOAST
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   TOAST
+════════════════════════════════ */
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 2400);
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ══════════════════════════════════════
-//  KEYBOARD
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   KEYBOARD
+════════════════════════════════ */
 document.addEventListener('keydown', e => {
-  if (e.key==='Escape') { closeModal(); pendingPickMode=null; }
-  if (e.key==='Enter' && document.getElementById('modal').classList.contains('open')) confirmModal();
+  if (e.key === 'Escape') { closeModal(); closeTitleModal(); cancelPickMode(); }
+  if (e.key === 'Enter') {
+    if (document.getElementById('modal').classList.contains('open')) confirmModal();
+    if (document.getElementById('modalTitle').classList.contains('open')) confirmTitle();
+  }
 });
-document.getElementById('inName').addEventListener('keydown', e => { if(e.key==='Enter') addCourse(); });
+document.getElementById('inName').addEventListener('keydown', e => { if (e.key === 'Enter') addCourse(); });
 
-// ══════════════════════════════════════
-//  BOOT — with sample data
-// ══════════════════════════════════════
+/* ════════════════════════════════
+   BOOT — sample data
+════════════════════════════════ */
 function boot() {
-  // sample courses
-  [
-    {name:'數學',room:'A101',ci:9},
-    {name:'英文',room:'B203',ci:8},
-    {name:'物理',room:'C105',ci:6},
-    {name:'歷史',room:'D301',ci:3},
-    {name:'體育',room:'操場',ci:2},
-    {name:'音樂',room:'E102',ci:11},
-  ].forEach(x => courses.push({id:Date.now()+Math.random(), name:x.name, room:x.room, colorIdx:x.ci}));
-  // sample schedule
+  const demo = [
+    {name:'數學',   room:'A101', ci:9,  sessions:4},
+    {name:'英文',   room:'B203', ci:8,  sessions:3},
+    {name:'物理',   room:'C105', ci:6,  sessions:2},
+    {name:'歷史',   room:'D301', ci:3,  sessions:2},
+    {name:'體育',   room:'操場', ci:2,  sessions:2},
+    {name:'音樂',   room:'E102', ci:11, sessions:1},
+  ];
+  demo.forEach(x => courses.push({id: Date.now()+Math.random(), name:x.name, room:x.room, colorIdx:x.ci, sessions:x.sessions}));
+
+  // pre-fill some slots
+  const ids = courses.reduce((acc,c) => { acc[c.name]=c.id; return acc; }, {});
   schedule = {
-    '0-0':{name:'數學',room:'A101',colorIdx:9},
-    '1-0':{name:'英文',room:'B203',colorIdx:8},
-    '2-0':{name:'物理',room:'C105',colorIdx:6},
-    '0-2':{name:'歷史',room:'D301',colorIdx:3},
-    '3-1':{name:'體育',room:'操場',colorIdx:2},
-    '4-3':{name:'音樂',room:'E102',colorIdx:11},
-    '1-4':{name:'數學',room:'A101',colorIdx:9},
-    '3-4':{name:'英文',room:'B203',colorIdx:8},
+    '0-0':{name:'數學',room:'A101',colorIdx:9,  courseId:ids['數學']},
+    '1-0':{name:'英文',room:'B203',colorIdx:8,  courseId:ids['英文']},
+    '2-0':{name:'物理',room:'C105',colorIdx:6,  courseId:ids['物理']},
+    '0-2':{name:'歷史',room:'D301',colorIdx:3,  courseId:ids['歷史']},
+    '3-1':{name:'體育',room:'操場',colorIdx:2,  courseId:ids['體育']},
+    '4-3':{name:'音樂',room:'E102',colorIdx:11, courseId:ids['音樂']},
   };
   renderMain();
 }
